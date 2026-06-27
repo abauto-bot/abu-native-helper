@@ -22,6 +22,13 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -32,15 +39,20 @@ jobs:
           pwd
           find . -maxdepth 4 -type f | sort
 
-      - name: Safety scan before build
+      - name: Safety scan active app source only
         run: |
-          echo "===== SAFETY SCAN ====="
-          ! grep -R "RECORD_AUDIO\|MediaProjectionManager\|ImageReader\|dispatchGesture\|getRootInActiveWindow\|android.intent.category.HOME\|DEVICE_ADMIN" -n app/src/main || {
+          echo "===== ACTIVE APP SOURCE SAFETY SCAN ====="
+          BAD_REGEX="RECORD_AUDIO|MediaProjectionManager|ImageReader|dispatchGesture|getRootInActiveWindow|android.intent.category.HOME|DEVICE_ADMIN"
+          if grep -R -E "$BAD_REGEX" -n app/src/main; then
             echo "Dangerous active control string found. Stop build."
             exit 1
-          }
-          grep -R "android:enabled=\"false\"" -n app/src/main/AndroidManifest.xml || true
+          fi
           echo "Safety scan passed."
+
+      - name: Confirm disabled services
+        run: |
+          echo "===== DISABLED SERVICE CHECK ====="
+          grep -R 'android:enabled="false"' -n app/src/main/AndroidManifest.xml
 
       - name: Build debug APK
         run: gradle :app:assembleDebug --stacktrace
