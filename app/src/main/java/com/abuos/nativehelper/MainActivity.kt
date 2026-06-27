@@ -44,6 +44,7 @@ class MainActivity : Activity() {
     private lateinit var launcherStatusText: TextView
     private lateinit var languageStatusText: TextView
     private lateinit var pairingSyncStatusText: TextView
+    private lateinit var pairingApiStatusText: TextView
 
     private val bg = Color.rgb(3, 7, 5)
     private val cardBg = Color.rgb(8, 25, 18)
@@ -188,7 +189,7 @@ Device:
 - Device: ${Build.DEVICE}
 - Android: ${Build.VERSION.RELEASE}
 - SDK: ${Build.VERSION.SDK_INT}
-- App Version: V10.9
+- App Version: V11.0
 """.trimIndent()
     }
 
@@ -369,6 +370,7 @@ No auto-send. No bot token. No background execution.
         refreshLauncherShell()
         refreshLanguageFoundation()
         refreshPairingSyncDesign()
+        refreshPairingApiBoundary()
     }
 
     private fun refreshVoiceFoundation() {
@@ -481,6 +483,126 @@ This app cannot control the screen yet. It only declares a disabled prototype.
 
 
 
+
+
+    private fun buildPairingApiJson(): String {
+        val localId = getOrCreateLocalId()
+        val pairingCode = prefs.getString("pairing_code", "") ?: ""
+        val language = currentLanguage()
+
+        return """
+{
+  "api_version": "v11.0",
+  "mode": "pairing_request_draft_only",
+  "endpoint_future": "https://ai.ecoluup.com/api/device/pair/request",
+  "phone_node": {
+    "local_phone_id": "$localId",
+    "pairing_code": "${if (pairingCode.isBlank()) "not_set" else pairingCode}",
+    "app_package": "com.abuos.nativehelper",
+    "app_version": "1.1.0-v11.0",
+    "language_mode": "$language"
+  },
+  "security": {
+    "server_call": "disabled",
+    "real_token": "not_issued",
+    "execution": "disabled",
+    "background_sync": "blocked",
+    "notification_access": "disabled",
+    "accessibility": "disabled",
+    "screen_capture": "disabled"
+  },
+  "requested_at": "${nowIso()}"
+}
+""".trimIndent()
+    }
+
+    private fun preparePairingApiDraft() {
+        val draft = buildPairingApiJson()
+
+        prefs.edit()
+            .putString("pairing_api_state", "api_request_draft_saved_local_only")
+            .putString("pairing_api_draft", draft)
+            .putString("pairing_api_draft_at", nowIso())
+            .apply()
+
+        refreshPairingApiBoundary()
+        Toast.makeText(this, "Pairing API draft saved locally", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun sharePairingApiDraft() {
+        val draft = prefs.getString("pairing_api_draft", "") ?: ""
+        val payload = if (draft.isBlank()) buildPairingApiJson() else draft
+
+        val msg = """
+ABU Native Helper Pairing API Draft
+
+$payload
+
+Safety:
+This is manual share only.
+No server call from APK.
+No token issued.
+No execution enabled.
+""".trimIndent()
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, msg)
+        }
+
+        try {
+            prefs.edit()
+                .putString("pairing_api_state", "manual_share_intent_opened")
+                .putString("pairing_api_shared_at", nowIso())
+                .apply()
+
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Share unavailable", Toast.LENGTH_SHORT).show()
+        }
+
+        refreshPairingApiBoundary()
+    }
+
+    private fun clearPairingApiDraft() {
+        prefs.edit()
+            .putString("pairing_api_state", "no_draft")
+            .putString("pairing_api_draft_at", "never")
+            .remove("pairing_api_draft")
+            .apply()
+
+        refreshPairingApiBoundary()
+        Toast.makeText(this, "Pairing API draft cleared", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun refreshPairingApiBoundary() {
+        val state = prefs.getString("pairing_api_state", "no_draft")
+        val draftAt = prefs.getString("pairing_api_draft_at", "never")
+        val sharedAt = prefs.getString("pairing_api_shared_at", "never")
+        val localId = getOrCreateLocalId()
+        val pairingCode = prefs.getString("pairing_code", "") ?: ""
+
+        pairingApiStatusText.text = """
+Pairing API Boundary:
+- Future endpoint: /api/device/pair/request
+- ABU Phone ID: $localId
+- Pairing code: ${if (pairingCode.isBlank()) "not set" else pairingCode}
+- API draft state: $state
+- Draft saved at: $draftAt
+- Manual shared at: $sharedAt
+- Server call: disabled
+- Real token: not issued
+- Execution: disabled
+
+V11.0 contract:
+APK can prepare pairing JSON locally.
+APK cannot call server yet.
+Server must create audit event before real device token.
+
+Next:
+V11.1 will create private Web Node pairing API skeleton.
+""".trimIndent()
+    }
 
     private fun preparePairingSyncDraft() {
         val localId = getOrCreateLocalId()
@@ -787,8 +909,8 @@ Security:
         }
 
         root.addView(tv("ABU Native Helper", 30f, textColor, true))
-        root.addView(tv("V10.9 Pairing Sync Design", 15f, gold, true))
-        root.addView(tv("Local pairing sync design foundation. No server sync yet.", 15f, muted))
+        root.addView(tv("V11.0 Pairing API Boundary", 15f, gold, true))
+        root.addView(tv("Real pairing API contract foundation. No network call yet.", 15f, muted))
 
 
         root.addView(card(
@@ -901,6 +1023,51 @@ Security:
 
         pairingSyncStatusText = tv("Loading pairing sync design...", 14f, textColor)
         root.addView(pairingSyncStatusText)
+
+
+        root.addView(card(
+            "🔐 Pairing API Boundary",
+            "Prepare a local API request draft for future Web Node pairing. No server call yet."
+        ))
+
+        val prepareApiDraftButton = Button(this).apply {
+            text = "Prepare Pairing API JSON"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(green, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener {
+                preparePairingApiDraft()
+                refreshAll()
+            }
+        }
+        root.addView(prepareApiDraftButton)
+
+        val shareApiDraftButton = Button(this).apply {
+            text = "Share Pairing API Draft"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(gold, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener { sharePairingApiDraft() }
+        }
+        root.addView(shareApiDraftButton)
+
+        val clearApiDraftButton = Button(this).apply {
+            text = "Clear Pairing API Draft"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(gold, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener {
+                clearPairingApiDraft()
+                refreshAll()
+            }
+        }
+        root.addView(clearApiDraftButton)
+
+        pairingApiStatusText = tv("Loading pairing API boundary...", 14f, textColor)
+        root.addView(pairingApiStatusText)
 
         root.addView(card(
             "📊 Phone Status",
@@ -1127,7 +1294,7 @@ Security:
 
         root.addView(card(
             "🚀 Next",
-            "V11.0 will add real pairing API design and auth boundary."
+            "V11.1 will create private Web Node pairing API skeleton."
         ))
 
         val scroll = ScrollView(this)
