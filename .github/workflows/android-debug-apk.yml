@@ -27,7 +27,6 @@ jobs:
 
       - name: Install Android SDK packages
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Set up Gradle
@@ -35,12 +34,9 @@ jobs:
         with:
           gradle-version: "8.10.2"
 
-      - name: Show environment
+      - name: Show project files
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          java -version
-          gradle -v
+          pwd
           find . -maxdepth 4 -type f | sort
 
       - name: Safety scan active app source only
@@ -58,18 +54,8 @@ jobs:
           echo "===== DISABLED SERVICE CHECK ====="
           grep -R 'android:enabled="false"' -n app/src/main/AndroidManifest.xml
 
-      - name: Build debug APK with full log
-        run: |
-          set -o pipefail
-          gradle :app:assembleDebug --stacktrace --info 2>&1 | tee build-log.txt
-
-      - name: Upload build log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: abu-native-helper-build-log
-          path: build-log.txt
-          if-no-files-found: warn
+      - name: Build debug APK
+        run: gradle :app:assembleDebug --stacktrace
 
       - name: List APK output
         run: find app/build/outputs/apk -type f -name "*.apk" -ls
