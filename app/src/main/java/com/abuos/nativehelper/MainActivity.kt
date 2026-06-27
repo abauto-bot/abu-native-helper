@@ -189,7 +189,7 @@ Device:
 - Device: ${Build.DEVICE}
 - Android: ${Build.VERSION.RELEASE}
 - SDK: ${Build.VERSION.SDK_INT}
-- App Version: V11.0
+- App Version: V12.1
 """.trimIndent()
     }
 
@@ -492,14 +492,14 @@ This app cannot control the screen yet. It only declares a disabled prototype.
 
         return """
 {
-  "api_version": "v11.0",
+  "api_version": "v12.1",
   "mode": "pairing_request_draft_only",
   "endpoint_future": "https://ai.ecoluup.com/api/device/pair/request",
   "phone_node": {
     "local_phone_id": "$localId",
     "pairing_code": "${if (pairingCode.isBlank()) "not_set" else pairingCode}",
     "app_package": "com.abuos.nativehelper",
-    "app_version": "1.1.0-v11.0",
+    "app_version": "1.2.1-v12.1",
     "language_mode": "$language"
   },
   "security": {
@@ -594,13 +594,13 @@ Pairing API Boundary:
 - Real token: not issued
 - Execution: disabled
 
-V11.0 contract:
+V12.1 contract:
 APK can prepare pairing JSON locally.
 APK cannot call server yet.
 Server must create audit event before real device token.
 
 Next:
-V11.1 will create private Web Node pairing API skeleton.
+V12.2 will add private Web Node pairing API skeleton.
 """.trimIndent()
     }
 
@@ -909,8 +909,8 @@ Security:
         }
 
         root.addView(tv("ABU Native Helper", 30f, textColor, true))
-        root.addView(tv("V11.0 Pairing API Boundary", 15f, gold, true))
-        root.addView(tv("Real pairing API contract foundation. No network call yet.", 15f, muted))
+        root.addView(tv("V12.1 Beta Architecture Foundation", 15f, gold, true))
+        root.addView(tv("Full beta source architecture. No server execution token.", 15f, muted))
 
 
         root.addView(card(
@@ -1294,7 +1294,7 @@ Security:
 
         root.addView(card(
             "🚀 Next",
-            "V11.1 will create private Web Node pairing API skeleton."
+            "V12.2 will add private Web Node pairing API skeleton."
         ))
 
         val scroll = ScrollView(this)
