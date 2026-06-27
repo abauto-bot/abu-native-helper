@@ -45,7 +45,7 @@ class MainActivity : Activity() {
     private val cardBg = Color.rgb(13, 31, 24)
     private val green = Color.rgb(81, 242, 139)
     private val gold = Color.rgb(244, 199, 107)
-    private val text = Color.rgb(238, 251, 243)
+    private val textColor = Color.rgb(238, 251, 243)
     private val muted = Color.rgb(157, 181, 168)
 
     data class AllowedApp(
@@ -635,7 +635,7 @@ Security:
             setBackgroundColor(bg)
         }
 
-        root.addView(tv("ABU Native Helper", 30f, text, true))
+        root.addView(tv("ABU Native Helper", 30f, textColor, true))
         root.addView(tv("V9.9 ABU Launcher Shell", 15f, gold, true))
         root.addView(tv("Launcher-style command home foundation. Not default launcher yet.", 15f, muted))
 
@@ -658,7 +658,7 @@ Security:
             hint = "Enter pairing code"
             textSize = 18f
             setSingleLine(true)
-            setTextColor(text)
+            setTextColor(textColor)
             setHintTextColor(muted)
             setPadding(24, 18, 24, 18)
         }
@@ -699,7 +699,7 @@ Security:
         }
         root.addView(refreshButton)
 
-        phoneStatusText = tv("Loading phone status...", 14f, text)
+        phoneStatusText = tv("Loading phone status...", 14f, textColor)
         root.addView(phoneStatusText)
 
         root.addView(card(
@@ -721,7 +721,7 @@ Security:
         }
         root.addView(settingsButton)
 
-        appStatusText = tv("Loading app allowlist...", 14f, text)
+        appStatusText = tv("Loading app allowlist...", 14f, textColor)
         root.addView(appStatusText)
 
         root.addView(card(
@@ -742,7 +742,7 @@ Security:
         }
         root.addView(notificationSettingsButton)
 
-        notificationStatusText = tv("Loading notification foundation...", 14f, text)
+        notificationStatusText = tv("Loading notification foundation...", 14f, textColor)
         root.addView(notificationStatusText)
 
         root.addView(card(
@@ -754,7 +754,7 @@ Security:
             hint = "Example: /home or battery dekhao"
             textSize = 18f
             minLines = 2
-            setTextColor(text)
+            setTextColor(textColor)
             setHintTextColor(muted)
             setPadding(24, 18, 24, 18)
         }
@@ -790,7 +790,7 @@ Security:
         }
         root.addView(clearVoiceButton)
 
-        voiceStatusText = tv("Loading voice foundation...", 14f, text)
+        voiceStatusText = tv("Loading voice foundation...", 14f, textColor)
         root.addView(voiceStatusText)
 
 
@@ -812,7 +812,7 @@ Security:
         }
         root.addView(screenVisionSettingsButton)
 
-        screenVisionStatusText = tv("Loading screen vision foundation...", 14f, text)
+        screenVisionStatusText = tv("Loading screen vision foundation...", 14f, textColor)
         root.addView(screenVisionStatusText)
 
 
@@ -834,7 +834,7 @@ Security:
         }
         root.addView(accessibilitySettingsButton)
 
-        accessibilityStatusText = tv("Loading accessibility foundation...", 14f, text)
+        accessibilityStatusText = tv("Loading accessibility foundation...", 14f, textColor)
         root.addView(accessibilityStatusText)
 
 
@@ -896,7 +896,7 @@ Security:
         }
         root.addView(openTelegramButton)
 
-        launcherStatusText = tv("Loading launcher shell...", 14f, text)
+        launcherStatusText = tv("Loading launcher shell...", 14f, textColor)
         root.addView(launcherStatusText)
 
         root.addView(card(
