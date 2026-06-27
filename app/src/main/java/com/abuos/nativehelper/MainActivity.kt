@@ -45,6 +45,8 @@ class MainActivity : Activity() {
     private lateinit var languageStatusText: TextView
     private lateinit var pairingSyncStatusText: TextView
     private lateinit var pairingApiStatusText: TextView
+    private lateinit var finalBetaStatusText: TextView
+    private lateinit var manualPostBridgeStatusText: TextView
 
     private val bg = Color.rgb(3, 7, 5)
     private val cardBg = Color.rgb(8, 25, 18)
@@ -75,6 +77,7 @@ class MainActivity : Activity() {
             cornerRadius = radius
             setStroke(1, Color.argb(60, 255, 255, 255))
         }
+        refreshFinalBetaStatus()
     }
 
     private fun applyBlockMargin(view: android.view.View, top: Int = 10, bottom: Int = 10) {
@@ -189,7 +192,7 @@ Device:
 - Device: ${Build.DEVICE}
 - Android: ${Build.VERSION.RELEASE}
 - SDK: ${Build.VERSION.SDK_INT}
-- App Version: V11.0
+- App Version: V13.0
 """.trimIndent()
     }
 
@@ -371,6 +374,7 @@ No auto-send. No bot token. No background execution.
         refreshLanguageFoundation()
         refreshPairingSyncDesign()
         refreshPairingApiBoundary()
+        refreshManualPostBridge()
     }
 
     private fun refreshVoiceFoundation() {
@@ -485,6 +489,108 @@ This app cannot control the screen yet. It only declares a disabled prototype.
 
 
 
+
+    private fun buildManualPairingPostCommand(): String {
+        val json = buildPairingApiJson()
+        val safeJson = json.replace("'", "'\"'\"'")
+        return """
+curl -sk -u "ABU_PRIVATE_USER:ABU_PRIVATE_PASSWORD" \
+  -H "Content-Type: application/json" \
+  -X POST "https://ai.ecoluup.com/private/api/device/pair/request" \
+  -d '$safeJson'
+""".trimIndent()
+    }
+
+    private fun prepareManualPostBridgeDraft() {
+        val command = buildManualPairingPostCommand()
+
+        prefs.edit()
+            .putString("manual_post_bridge_state", "curl_command_draft_saved_local_only")
+            .putString("manual_post_bridge_command", command)
+            .putString("manual_post_bridge_draft_at", nowIso())
+            .apply()
+
+        refreshManualPostBridge()
+        Toast.makeText(this, "Manual POST command saved locally", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun shareManualPostBridgeDraft() {
+        val saved = prefs.getString("manual_post_bridge_command", "") ?: ""
+        val command = if (saved.isBlank()) buildManualPairingPostCommand() else saved
+
+        val msg = """
+ABU Manual Pairing POST Bridge
+
+Replace:
+ABU_PRIVATE_USER
+ABU_PRIVATE_PASSWORD
+
+Then run this manually from Termux:
+
+$command
+
+Safety:
+- APK did not call server.
+- No token issued.
+- No execution enabled.
+- Basic Auth credential is not stored in APK.
+""".trimIndent()
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, msg)
+        }
+
+        try {
+            prefs.edit()
+                .putString("manual_post_bridge_state", "manual_share_intent_opened")
+                .putString("manual_post_bridge_shared_at", nowIso())
+                .apply()
+
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Share unavailable", Toast.LENGTH_SHORT).show()
+        }
+
+        refreshManualPostBridge()
+    }
+
+    private fun clearManualPostBridgeDraft() {
+        prefs.edit()
+            .putString("manual_post_bridge_state", "no_draft")
+            .putString("manual_post_bridge_draft_at", "never")
+            .remove("manual_post_bridge_command")
+            .apply()
+
+        refreshManualPostBridge()
+        Toast.makeText(this, "Manual POST draft cleared", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun refreshManualPostBridge() {
+        val state = prefs.getString("manual_post_bridge_state", "no_draft")
+        val draftAt = prefs.getString("manual_post_bridge_draft_at", "never")
+        val sharedAt = prefs.getString("manual_post_bridge_shared_at", "never")
+        val command = prefs.getString("manual_post_bridge_command", "") ?: ""
+
+        manualPostBridgeStatusText.text = """
+Manual POST Bridge:
+- Endpoint: /private/api/device/pair/request
+- Public path: Basic Auth protected
+- Bridge state: $state
+- Draft saved at: $draftAt
+- Manual shared at: $sharedAt
+- Command saved: ${if (command.isBlank()) "no" else "yes"}
+- APK server call: disabled
+- Credential storage: disabled
+- Token issue: disabled
+- Execution: disabled
+
+V12.5 policy:
+APK prepares the pairing JSON and curl command only.
+User manually posts it through Termux/private channel.
+""".trimIndent()
+    }
+
     private fun buildPairingApiJson(): String {
         val localId = getOrCreateLocalId()
         val pairingCode = prefs.getString("pairing_code", "") ?: ""
@@ -492,14 +598,14 @@ This app cannot control the screen yet. It only declares a disabled prototype.
 
         return """
 {
-  "api_version": "v11.0",
+  "api_version": "v13.0",
   "mode": "pairing_request_draft_only",
   "endpoint_future": "https://ai.ecoluup.com/api/device/pair/request",
   "phone_node": {
     "local_phone_id": "$localId",
     "pairing_code": "${if (pairingCode.isBlank()) "not_set" else pairingCode}",
     "app_package": "com.abuos.nativehelper",
-    "app_version": "1.1.0-v11.0",
+    "app_version": "1.3.0-v13.0",
     "language_mode": "$language"
   },
   "security": {
@@ -594,13 +700,13 @@ Pairing API Boundary:
 - Real token: not issued
 - Execution: disabled
 
-V11.0 contract:
+V12.5 contract:
 APK can prepare pairing JSON locally.
 APK cannot call server yet.
 Server must create audit event before real device token.
 
 Next:
-V11.1 will create private Web Node pairing API skeleton.
+V12.6 will add confirm/deny boundary UI foundation.
 """.trimIndent()
     }
 
@@ -835,6 +941,39 @@ Security:
 """.trimIndent()
     }
 
+
+    private fun refreshFinalBetaStatus() {
+        if (!::finalBetaStatusText.isInitialized) return
+
+        finalBetaStatusText.text = """
+V13.0 Final Beta Mesh:
+- APK version: 1.3.0-v13.0
+- Web Node: ai.ecoluup.com private API
+- Pairing API: ready
+- Device registry: ready
+- Safe command inbox: ready
+- Command approval boundary: ready
+- Token issue: disabled
+- Execution: disabled
+- Credential storage in APK: disabled
+- Direct server call from APK: disabled
+- Notification Access: disabled
+- Accessibility control: disabled
+- Screen capture: disabled
+- Default launcher replacement: disabled
+
+Private Web routes:
+- /private/api/device/pair/
+- /private/api/device/pair/command/inbox
+- /private/api/device/pair/command/decisions
+
+Current policy:
+This APK prepares and displays safe local drafts only.
+Real execution remains blocked until a future audited V14+ control layer.
+""".trimIndent()
+    }
+
+
     private fun refreshAll() {
         refreshPairingStatus()
         refreshPhoneStatus()
@@ -909,8 +1048,8 @@ Security:
         }
 
         root.addView(tv("ABU Native Helper", 30f, textColor, true))
-        root.addView(tv("V11.0 Pairing API Boundary", 15f, gold, true))
-        root.addView(tv("Real pairing API contract foundation. No network call yet.", 15f, muted))
+        root.addView(tv("V13.0 Final Beta Command Mesh", 15f, gold, true))
+        root.addView(tv("Final beta APK synced with private Web Node. No execution token.", 15f, muted))
 
 
         root.addView(card(
@@ -1068,6 +1207,60 @@ Security:
 
         pairingApiStatusText = tv("Loading pairing API boundary...", 14f, textColor)
         root.addView(pairingApiStatusText)
+
+
+        root.addView(card(
+            "🌉 Manual POST Bridge",
+            "Generate a manual curl command for the private pairing API. APK does not call server."
+        ))
+
+        val prepareManualPostButton = Button(this).apply {
+            text = "Prepare Manual POST Command"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(green, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener {
+                prepareManualPostBridgeDraft()
+                refreshAll()
+            }
+        }
+        root.addView(prepareManualPostButton)
+
+        val shareManualPostButton = Button(this).apply {
+            text = "Share Manual POST Command"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(gold, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener { shareManualPostBridgeDraft() }
+        }
+        root.addView(shareManualPostButton)
+
+        val clearManualPostButton = Button(this).apply {
+            text = "Clear Manual POST Draft"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(gold, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener {
+                clearManualPostBridgeDraft()
+                refreshAll()
+            }
+        }
+        root.addView(clearManualPostButton)
+
+        manualPostBridgeStatusText = tv("Loading manual POST bridge...", 14f, textColor)
+        root.addView(manualPostBridgeStatusText)
+
+
+        root.addView(card(
+            "🚀 V13.0 Final Beta Mesh",
+            "APK synced with private Web Node pairing, command inbox, and approval boundary. Execution disabled."
+        ))
+
+        finalBetaStatusText = tv("Loading final beta status...", 14f, textColor)
+        root.addView(finalBetaStatusText)
 
         root.addView(card(
             "📊 Phone Status",
@@ -1294,7 +1487,7 @@ Security:
 
         root.addView(card(
             "🚀 Next",
-            "V11.1 will create private Web Node pairing API skeleton."
+            "V12.6 will add confirm/deny boundary UI foundation."
         ))
 
         val scroll = ScrollView(this)
