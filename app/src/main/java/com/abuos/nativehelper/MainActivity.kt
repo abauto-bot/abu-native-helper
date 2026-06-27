@@ -45,6 +45,7 @@ class MainActivity : Activity() {
     private lateinit var languageStatusText: TextView
     private lateinit var pairingSyncStatusText: TextView
     private lateinit var pairingApiStatusText: TextView
+    private lateinit var finalBetaStatusText: TextView
     private lateinit var manualPostBridgeStatusText: TextView
 
     private val bg = Color.rgb(3, 7, 5)
@@ -76,6 +77,7 @@ class MainActivity : Activity() {
             cornerRadius = radius
             setStroke(1, Color.argb(60, 255, 255, 255))
         }
+        refreshFinalBetaStatus()
     }
 
     private fun applyBlockMargin(view: android.view.View, top: Int = 10, bottom: Int = 10) {
@@ -190,7 +192,7 @@ Device:
 - Device: ${Build.DEVICE}
 - Android: ${Build.VERSION.RELEASE}
 - SDK: ${Build.VERSION.SDK_INT}
-- App Version: V12.5
+- App Version: V13.0
 """.trimIndent()
     }
 
@@ -596,14 +598,14 @@ User manually posts it through Termux/private channel.
 
         return """
 {
-  "api_version": "v12.5",
+  "api_version": "v13.0",
   "mode": "pairing_request_draft_only",
   "endpoint_future": "https://ai.ecoluup.com/api/device/pair/request",
   "phone_node": {
     "local_phone_id": "$localId",
     "pairing_code": "${if (pairingCode.isBlank()) "not_set" else pairingCode}",
     "app_package": "com.abuos.nativehelper",
-    "app_version": "1.2.5-v12.5",
+    "app_version": "1.3.0-v13.0",
     "language_mode": "$language"
   },
   "security": {
@@ -939,6 +941,39 @@ Security:
 """.trimIndent()
     }
 
+
+    private fun refreshFinalBetaStatus() {
+        if (!::finalBetaStatusText.isInitialized) return
+
+        finalBetaStatusText.text = """
+V13.0 Final Beta Mesh:
+- APK version: 1.3.0-v13.0
+- Web Node: ai.ecoluup.com private API
+- Pairing API: ready
+- Device registry: ready
+- Safe command inbox: ready
+- Command approval boundary: ready
+- Token issue: disabled
+- Execution: disabled
+- Credential storage in APK: disabled
+- Direct server call from APK: disabled
+- Notification Access: disabled
+- Accessibility control: disabled
+- Screen capture: disabled
+- Default launcher replacement: disabled
+
+Private Web routes:
+- /private/api/device/pair/
+- /private/api/device/pair/command/inbox
+- /private/api/device/pair/command/decisions
+
+Current policy:
+This APK prepares and displays safe local drafts only.
+Real execution remains blocked until a future audited V14+ control layer.
+""".trimIndent()
+    }
+
+
     private fun refreshAll() {
         refreshPairingStatus()
         refreshPhoneStatus()
@@ -1013,8 +1048,8 @@ Security:
         }
 
         root.addView(tv("ABU Native Helper", 30f, textColor, true))
-        root.addView(tv("V12.5 Manual POST Bridge", 15f, gold, true))
-        root.addView(tv("Manual pairing POST bridge. APK does not call server directly.", 15f, muted))
+        root.addView(tv("V13.0 Final Beta Command Mesh", 15f, gold, true))
+        root.addView(tv("Final beta APK synced with private Web Node. No execution token.", 15f, muted))
 
 
         root.addView(card(
@@ -1217,6 +1252,15 @@ Security:
 
         manualPostBridgeStatusText = tv("Loading manual POST bridge...", 14f, textColor)
         root.addView(manualPostBridgeStatusText)
+
+
+        root.addView(card(
+            "🚀 V13.0 Final Beta Mesh",
+            "APK synced with private Web Node pairing, command inbox, and approval boundary. Execution disabled."
+        ))
+
+        finalBetaStatusText = tv("Loading final beta status...", 14f, textColor)
+        root.addView(finalBetaStatusText)
 
         root.addView(card(
             "📊 Phone Status",

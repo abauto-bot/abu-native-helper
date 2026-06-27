@@ -1,7 +1,7 @@
 package com.abuos.nativehelper.core
 
 object AbuSafetyPolicy {
-    const val POLICY_VERSION = "v12.5"
+    const val POLICY_VERSION = "v13.0"
 
     val blockedCapabilities = listOf(
         "root_execution",
