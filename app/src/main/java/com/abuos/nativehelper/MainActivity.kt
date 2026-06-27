@@ -43,6 +43,7 @@ class MainActivity : Activity() {
     private lateinit var accessibilityStatusText: TextView
     private lateinit var launcherStatusText: TextView
     private lateinit var languageStatusText: TextView
+    private lateinit var pairingSyncStatusText: TextView
 
     private val bg = Color.rgb(3, 7, 5)
     private val cardBg = Color.rgb(8, 25, 18)
@@ -187,7 +188,7 @@ Device:
 - Device: ${Build.DEVICE}
 - Android: ${Build.VERSION.RELEASE}
 - SDK: ${Build.VERSION.SDK_INT}
-- App Version: V10.8
+- App Version: V10.9
 """.trimIndent()
     }
 
@@ -367,6 +368,7 @@ No auto-send. No bot token. No background execution.
         refreshAccessibilityFoundation()
         refreshLauncherShell()
         refreshLanguageFoundation()
+        refreshPairingSyncDesign()
     }
 
     private fun refreshVoiceFoundation() {
@@ -478,6 +480,62 @@ This app cannot control the screen yet. It only declares a disabled prototype.
     }
 
 
+
+
+    private fun preparePairingSyncDraft() {
+        val localId = getOrCreateLocalId()
+        val pairingCode = prefs.getString("pairing_code", "") ?: ""
+
+        prefs.edit()
+            .putString("pairing_sync_state", "draft_saved_local_only")
+            .putString("pairing_sync_local_id", localId)
+            .putString("pairing_sync_code_preview", if (pairingCode.isBlank()) "not_set" else pairingCode)
+            .putString("pairing_sync_draft_at", nowIso())
+            .apply()
+
+        refreshPairingSyncDesign()
+        Toast.makeText(this, "Pairing sync draft saved locally", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun clearPairingSyncDraft() {
+        prefs.edit()
+            .putString("pairing_sync_state", "no_draft")
+            .putString("pairing_sync_draft_at", "never")
+            .remove("pairing_sync_code_preview")
+            .apply()
+
+        refreshPairingSyncDesign()
+        Toast.makeText(this, "Pairing sync draft cleared", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun refreshPairingSyncDesign() {
+        val localId = getOrCreateLocalId()
+        val pairingCode = prefs.getString("pairing_code", "") ?: ""
+        val syncState = prefs.getString("pairing_sync_state", "no_draft")
+        val draftAt = prefs.getString("pairing_sync_draft_at", "never")
+
+        pairingSyncStatusText.text = """
+Pairing Sync Design:
+- ABU Phone ID: $localId
+- Pairing code: ${if (pairingCode.isBlank()) "not set" else pairingCode}
+- Sync state: $syncState
+- Draft saved at: $draftAt
+- Server sync: disabled
+- Real token: not issued
+- Background sync: blocked
+- Execution: disabled
+
+Future V11 flow:
+1. APK sends safe pairing request to ABU Web Node
+2. Web Node creates audit event
+3. Telegram/Private portal confirms device
+4. Server issues limited device token
+5. Phone can report safe status only
+
+V10.9 policy:
+This is only a local sync design foundation. No network request is made.
+""".trimIndent()
+    }
 
     private fun currentLanguage(): String {
         return prefs.getString("language_mode", "en") ?: "en"
@@ -729,8 +787,8 @@ Security:
         }
 
         root.addView(tv("ABU Native Helper", 30f, textColor, true))
-        root.addView(tv("V10.8 Language Toggle Foundation", 15f, gold, true))
-        root.addView(tv("English/Bangla label mode foundation. Safe mode active.", 15f, muted))
+        root.addView(tv("V10.9 Pairing Sync Design", 15f, gold, true))
+        root.addView(tv("Local pairing sync design foundation. No server sync yet.", 15f, muted))
 
 
         root.addView(card(
@@ -798,6 +856,51 @@ Security:
             setOnClickListener { clearPairing() }
         }
         root.addView(clearButton)
+
+
+        root.addView(card(
+            "🔗 Pairing Portal Sync Design",
+            "Prepare a local pairing sync draft. No server request and no token issue yet."
+        ))
+
+        val pairingSyncButton = Button(this).apply {
+            text = "Prepare Pairing Sync Draft"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(green, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener {
+                preparePairingSyncDraft()
+                refreshAll()
+            }
+        }
+        root.addView(pairingSyncButton)
+
+        val openPairingSyncPortalButton = Button(this).apply {
+            text = "Open Pairing Portal"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(gold, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener { openSafeUrl("Pairing Portal", "https://ai.ecoluup.com/private/pairing/") }
+        }
+        root.addView(openPairingSyncPortalButton)
+
+        val clearPairingSyncButton = Button(this).apply {
+            text = "Clear Pairing Sync Draft"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(gold, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener {
+                clearPairingSyncDraft()
+                refreshAll()
+            }
+        }
+        root.addView(clearPairingSyncButton)
+
+        pairingSyncStatusText = tv("Loading pairing sync design...", 14f, textColor)
+        root.addView(pairingSyncStatusText)
 
         root.addView(card(
             "📊 Phone Status",
@@ -1024,7 +1127,7 @@ Security:
 
         root.addView(card(
             "🚀 Next",
-            "V10.9 will add Pairing Portal sync design foundation."
+            "V11.0 will add real pairing API design and auth boundary."
         ))
 
         val scroll = ScrollView(this)
