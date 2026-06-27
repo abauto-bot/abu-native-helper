@@ -14,4 +14,13 @@ android {
         versionCode = 9
         versionName = "0.9.0-v9.9"
     }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
