@@ -42,6 +42,7 @@ class MainActivity : Activity() {
     private lateinit var screenVisionStatusText: TextView
     private lateinit var accessibilityStatusText: TextView
     private lateinit var launcherStatusText: TextView
+    private lateinit var languageStatusText: TextView
 
     private val bg = Color.rgb(3, 7, 5)
     private val cardBg = Color.rgb(8, 25, 18)
@@ -186,7 +187,7 @@ Device:
 - Device: ${Build.DEVICE}
 - Android: ${Build.VERSION.RELEASE}
 - SDK: ${Build.VERSION.SDK_INT}
-- App Version: V10.7
+- App Version: V10.8
 """.trimIndent()
     }
 
@@ -365,6 +366,7 @@ No auto-send. No bot token. No background execution.
         refreshScreenVisionFoundation()
         refreshAccessibilityFoundation()
         refreshLauncherShell()
+        refreshLanguageFoundation()
     }
 
     private fun refreshVoiceFoundation() {
@@ -475,6 +477,76 @@ This app cannot control the screen yet. It only declares a disabled prototype.
 """.trimIndent()
     }
 
+
+
+    private fun currentLanguage(): String {
+        return prefs.getString("language_mode", "en") ?: "en"
+    }
+
+    private fun label(en: String, bn: String): String {
+        return if (currentLanguage() == "bn") bn else en
+    }
+
+    private fun toggleLanguageMode() {
+        val next = if (currentLanguage() == "bn") "en" else "bn"
+
+        prefs.edit()
+            .putString("language_mode", next)
+            .putString("language_mode_updated_at", nowIso())
+            .apply()
+
+        refreshLanguageFoundation()
+
+        val msg = if (next == "bn") "Bangla mode selected" else "English mode selected"
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun refreshLanguageFoundation() {
+        val lang = currentLanguage()
+        val updatedAt = prefs.getString("language_mode_updated_at", "never")
+
+        languageStatusText.text = if (lang == "bn") {
+            """
+ভাষা মোড:
+- বর্তমান: বাংলা
+- আপডেট: $updatedAt
+- নেটওয়ার্ক: বন্ধ
+- সার্ভার sync: বন্ধ
+- permission: নতুন কিছু নেই
+
+বাংলা লেবেল preview:
+- ডিভাইস পেয়ার করুন
+- ফোন স্ট্যাটাস
+- অ্যাপ খুলুন
+- ভয়েস ড্রাফট
+- সেফটি পলিসি
+- ABU ওয়েব পোর্টাল
+
+V10.8 policy:
+এটা local-only language preference. কোনো dangerous permission নেই.
+""".trimIndent()
+        } else {
+            """
+Language Mode:
+- Current: English
+- Updated: $updatedAt
+- Network: disabled
+- Server sync: disabled
+- Permission: no new permission
+
+English label preview:
+- Pair Device
+- Phone Status
+- Open Apps
+- Voice Draft
+- Safety Policy
+- ABU Web Portal
+
+V10.8 policy:
+This is a local-only language preference. No dangerous permission.
+""".trimIndent()
+        }
+    }
 
     private fun selectLauncherCard(name: String) {
         prefs.edit()
@@ -657,8 +729,30 @@ Security:
         }
 
         root.addView(tv("ABU Native Helper", 30f, textColor, true))
-        root.addView(tv("V10.7 Premium Command Shell", 15f, gold, true))
-        root.addView(tv("Cleaner beta shell. Safe mode active. Not default launcher yet.", 15f, muted))
+        root.addView(tv("V10.8 Language Toggle Foundation", 15f, gold, true))
+        root.addView(tv("English/Bangla label mode foundation. Safe mode active.", 15f, muted))
+
+
+        root.addView(card(
+            "🌐 Language Mode / ভাষা",
+            "Switch English/Bangla label mode locally. No server sync, no permission."
+        ))
+
+        val languageToggleButton = Button(this).apply {
+            text = "Toggle English / বাংলা"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            background = rounded(gold, 22f)
+            setPadding(16, 14, 16, 14)
+            setOnClickListener {
+                toggleLanguageMode()
+                refreshAll()
+            }
+        }
+        root.addView(languageToggleButton)
+
+        languageStatusText = tv("Loading language mode...", 14f, textColor)
+        root.addView(languageStatusText)
 
         root.addView(card(
             "📱 Local ABU Phone ID",
@@ -930,7 +1024,7 @@ Security:
 
         root.addView(card(
             "🚀 Next",
-            "V10.8 will add Bangla/English label toggle foundation."
+            "V10.9 will add Pairing Portal sync design foundation."
         ))
 
         val scroll = ScrollView(this)

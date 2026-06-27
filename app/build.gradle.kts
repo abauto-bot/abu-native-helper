@@ -11,8 +11,8 @@ android {
         applicationId = "com.abuos.nativehelper"
         minSdk = 26
         targetSdk = 35
-        versionCode = 10
-        versionName = "1.0.7-v10.7"
+        versionCode = 11
+        versionName = "1.0.8-v10.8"
     }
 
     compileOptions {
