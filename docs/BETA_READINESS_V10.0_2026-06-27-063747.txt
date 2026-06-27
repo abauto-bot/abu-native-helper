@@ -1,0 +1,185 @@
+===== ABU NATIVE HELPER V10.0 BETA READINESS =====
+Time: 2026-06-27T06:37:47+06:00
+Project: /data/data/com.termux/files/home/abu-native-helper
+
+===== 1) PROJECT FILES =====
+./README.md
+./app/build.gradle.kts
+./app/src/main/AndroidManifest.xml
+./build.gradle.kts
+./docs/ABU_LAUNCHER_SHELL_V9.9.md
+./docs/ACCESSIBILITY_SERVICE_V9.8.md
+./docs/APP_OPEN_ALLOWLIST_V9.4.md
+./docs/BETA_READINESS_V10.0_2026-06-27-063747.txt
+./docs/BUILD_PLAN.md
+./docs/NOTIFICATION_LISTENER_V9.5.md
+./docs/PAIR_DEVICE_V9.2.md
+./docs/PHONE_STATUS_V9.3.md
+./docs/PROJECT_TREE_V9.1.txt
+./docs/PROJECT_TREE_V9.2.txt
+./docs/PROJECT_TREE_V9.3.txt
+./docs/PROJECT_TREE_V9.4.txt
+./docs/PROJECT_TREE_V9.5.txt
+./docs/PROJECT_TREE_V9.6.txt
+./docs/PROJECT_TREE_V9.7.txt
+./docs/PROJECT_TREE_V9.8.txt
+./docs/PROJECT_TREE_V9.9.txt
+./docs/SAFETY_POLICY.md
+./docs/SCREEN_VISION_FOUNDATION_V9.7.md
+./docs/VOICE_TELEGRAM_ROUTING_V9.6.md
+./settings.gradle.kts
+
+===== 2) VERSION CHECK =====
+app/build.gradle.kts:14:        versionCode = 9
+app/build.gradle.kts:15:        versionName = "0.9.0-v9.9"
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:168:- App Version: V9.9
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:490:ABU Launcher Shell:
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:509:V9.9 policy:
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:639:        root.addView(tv("V9.9 ABU Launcher Shell", 15f, gold, true))
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:842:            "🏠 ABU Launcher Shell",
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:843:            "V9.9 adds an in-app command home. It does not replace Android launcher yet."
+docs/SAFETY_POLICY.md:20:- In-app ABU Launcher Shell cards
+docs/ACCESSIBILITY_SERVICE_V9.8.md:50:V9.9:
+docs/ABU_LAUNCHER_SHELL_V9.9.md:1:# ABU Native Helper V9.9 — ABU Launcher Shell Foundation
+docs/ABU_LAUNCHER_SHELL_V9.9.md:5:- ABU Launcher Shell section
+docs/ABU_LAUNCHER_SHELL_V9.9.md:15:V9.9 does not replace Android launcher.
+docs/PROJECT_TREE_V9.9.txt:5:/data/data/com.termux/files/home/abu-native-helper/docs/ABU_LAUNCHER_SHELL_V9.9.md
+docs/PROJECT_TREE_V9.9.txt:20:/data/data/com.termux/files/home/abu-native-helper/docs/PROJECT_TREE_V9.9.txt
+docs/BETA_READINESS_V10.0_2026-06-27-063747.txt:10:./docs/ABU_LAUNCHER_SHELL_V9.9.md
+docs/BETA_READINESS_V10.0_2026-06-27-063747.txt:26:./docs/PROJECT_TREE_V9.9.txt
+
+===== 3) MANIFEST SAFETY CHECK =====
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- V9.8 safe minimum permissions only -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Package visibility only for allowlisted apps -->
+    <queries>
+        <package android:name="org.telegram.messenger" />
+        <package android:name="com.whatsapp" />
+        <package android:name="com.google.android.youtube" />
+        <package android:name="com.google.android.apps.maps" />
+        <package android:name="com.android.chrome" />
+        <package android:name="com.google.android.gm" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
+        android:theme="@style/AppTheme"
+        android:label="ABU Native Helper"
+        android:supportsRtl="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <!-- V9.8 foundation only: disabled notification listener skeleton -->
+        <service
+            android:name=".AbuNotificationListener"
+            android:label="ABU Notification Listener"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true"
+            android:enabled="false">
+
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+
+        </service>
+
+        <!-- V9.8 foundation only: disabled accessibility skeleton -->
+        <service
+            android:name=".AbuAccessibilityService"
+            android:label="ABU Accessibility Prototype"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true"
+            android:enabled="false">
+
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/abu_accessibility_config" />
+
+        </service>
+
+    </application>
+</manifest>
+
+===== 4) DANGEROUS PERMISSION SCAN =====
+docs/VOICE_TELEGRAM_ROUTING_V9.6.md:16:- RECORD_AUDIO
+✅ No dangerous active permission/control string found
+
+===== 5) DISABLED SERVICE CHECK =====
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:253:- Service class: AbuNotificationListener
+app/src/main/java/com/abuos/nativehelper/MainActivity.kt:434:- Service class: AbuAccessibilityService
+app/src/main/java/com/abuos/nativehelper/AbuNotificationListener.kt:19:class AbuNotificationListener : NotificationListenerService() {
+app/src/main/java/com/abuos/nativehelper/AbuAccessibilityService.kt:27:class AbuAccessibilityService : AccessibilityService() {
+app/src/main/AndroidManifest.xml:36:            android:name=".AbuNotificationListener"
+app/src/main/AndroidManifest.xml:40:            android:enabled="false">
+app/src/main/AndroidManifest.xml:50:            android:name=".AbuAccessibilityService"
+app/src/main/AndroidManifest.xml:54:            android:enabled="false">
+
+===== 6) GRADLE / JAVA / ANDROID TOOL CHECK =====
+java:
+The program java is not installed. Install it by executing:
+ pkg install openjdk-17
+or
+ pkg install openjdk-21
+or
+ pkg install openjdk-25
+
+gradle:
+The program gradle is not installed. Install it by executing:
+ pkg install gradle
+
+gradlew:
+gradlew not found
+
+android sdk env:
+ANDROID_HOME=
+ANDROID_SDK_ROOT=
+
+===== 7) BUILD FILES =====
+total 26
+drwx------.  4 u0_a370 u0_a370 3452 Jun 27 06:23 .
+drwx------. 13 u0_a370 u0_a370 3452 Jun 27 06:24 ..
+-rw-------.  1 u0_a370 u0_a370  490 Jun 27 06:23 README.md
+drwx------.  3 u0_a370 u0_a370 3452 Jun 27 06:23 app
+-rw-------.  1 u0_a370 u0_a370  142 Jun 27 06:23 build.gradle.kts
+drwx------.  2 u0_a370 u0_a370 3452 Jun 27 06:37 docs
+-rw-------.  1 u0_a370 u0_a370  337 Jun 27 06:23 settings.gradle.kts
+
+total 15
+drwx------. 3 u0_a370 u0_a370 3452 Jun 27 06:23 .
+drwx------. 4 u0_a370 u0_a370 3452 Jun 27 06:23 ..
+-rw-------. 1 u0_a370 u0_a370  464 Jun 27 06:36 build.gradle.kts
+drwx------. 3 u0_a370 u0_a370 3452 Jun 27 06:23 src
+
+===== 8) BETA DECISION =====
+If Java/Gradle/Android SDK are missing in Termux, build should be done in Android Studio or GitHub Actions.
+If Android Studio is available, open ~/abu-native-helper and sync Gradle.
+If using VPS/GitHub, push project and build debug APK there.
+
+===== 9) V10 SAFETY STATUS =====
+Execution token: not issued
+Server sync: disabled
+Notification listener: disabled
+Accessibility service: disabled
+Screen capture: not active
+Mic permission: absent
+Default launcher replacement: absent
+GOVO/Kasm: untouched
+
+===== V10.0 READINESS CHECK DONE =====

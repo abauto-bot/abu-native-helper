@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ABU Native Helper</string>
+    <string name="abu_accessibility_description">ABU Accessibility prototype is disabled by default. No tap, scroll, type, or screen read is active.</string>
+</resources>

@@ -1,0 +1,56 @@
+name: Build ABU Native Helper Debug APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-debug-apk:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Show project files
+        run: |
+          pwd
+          find . -maxdepth 4 -type f | sort
+
+      - name: Safety scan before build
+        run: |
+          echo "===== SAFETY SCAN ====="
+          ! grep -R "RECORD_AUDIO\|MediaProjectionManager\|ImageReader\|dispatchGesture\|getRootInActiveWindow\|android.intent.category.HOME\|DEVICE_ADMIN" -n app/src/main || {
+            echo "Dangerous active control string found. Stop build."
+            exit 1
+          }
+          grep -R "android:enabled=\"false\"" -n app/src/main/AndroidManifest.xml || true
+          echo "Safety scan passed."
+
+      - name: Build debug APK
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: List APK output
+        run: find app/build/outputs/apk -type f -name "*.apk" -ls
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: abu-native-helper-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

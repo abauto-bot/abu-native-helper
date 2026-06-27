@@ -1,0 +1,8 @@
+<resources>
+    <color name="abu_bg">#050907</color>
+    <color name="abu_card">#0D1F18</color>
+    <color name="abu_green">#51F28B</color>
+    <color name="abu_gold">#F4C76B</color>
+    <color name="abu_text">#EEFBF3</color>
+    <color name="abu_muted">#9DB5A8</color>
+</resources>

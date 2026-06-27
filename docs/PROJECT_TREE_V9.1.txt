@@ -1,0 +1,8 @@
+/data/data/com.termux/files/home/abu-native-helper/README.md
+/data/data/com.termux/files/home/abu-native-helper/app/build.gradle.kts
+/data/data/com.termux/files/home/abu-native-helper/app/src/main/AndroidManifest.xml
+/data/data/com.termux/files/home/abu-native-helper/build.gradle.kts
+/data/data/com.termux/files/home/abu-native-helper/docs/BUILD_PLAN.md
+/data/data/com.termux/files/home/abu-native-helper/docs/PROJECT_TREE_V9.1.txt
+/data/data/com.termux/files/home/abu-native-helper/docs/SAFETY_POLICY.md
+/data/data/com.termux/files/home/abu-native-helper/settings.gradle.kts
