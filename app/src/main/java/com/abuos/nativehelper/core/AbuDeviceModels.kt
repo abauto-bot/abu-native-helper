@@ -27,7 +27,7 @@ data class PhoneStatusSnapshot(
 )
 
 data class PairingRequestDraft(
-    val apiVersion: String = "v12.1",
+    val apiVersion: String = "v12.5",
     val mode: String = "pairing_request_draft_only",
     val endpointFuture: String = "https://ai.ecoluup.com/api/device/pair/request",
     val localPhoneId: String,

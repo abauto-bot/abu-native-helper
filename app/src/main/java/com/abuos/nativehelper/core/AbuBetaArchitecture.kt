@@ -1,7 +1,7 @@
 package com.abuos.nativehelper.core
 
 object AbuBetaArchitecture {
-    const val APP_VERSION = "1.2.1-v12.1"
+    const val APP_VERSION = "1.2.5-v12.5"
     const val SPRINT_NAME = "V12 Full Beta Sprint"
 
     val phoneApkLayers = listOf(
