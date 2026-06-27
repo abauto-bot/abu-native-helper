@@ -14,7 +14,9 @@ import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -41,8 +43,8 @@ class MainActivity : Activity() {
     private lateinit var accessibilityStatusText: TextView
     private lateinit var launcherStatusText: TextView
 
-    private val bg = Color.rgb(5, 9, 7)
-    private val cardBg = Color.rgb(13, 31, 24)
+    private val bg = Color.rgb(3, 7, 5)
+    private val cardBg = Color.rgb(8, 25, 18)
     private val green = Color.rgb(81, 242, 139)
     private val gold = Color.rgb(244, 199, 107)
     private val textColor = Color.rgb(238, 251, 243)
@@ -63,6 +65,24 @@ class MainActivity : Activity() {
         AllowedApp("Gmail", "com.google.android.gm")
     )
 
+
+    private fun rounded(color: Int, radius: Float = 28f): GradientDrawable {
+        return GradientDrawable().apply {
+            setColor(color)
+            cornerRadius = radius
+            setStroke(1, Color.argb(60, 255, 255, 255))
+        }
+    }
+
+    private fun applyBlockMargin(view: android.view.View, top: Int = 10, bottom: Int = 10) {
+        view.layoutParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(0, top, 0, bottom)
+        }
+    }
+
     private fun tv(value: String, size: Float, color: Int, bold: Boolean = false): TextView {
         return TextView(this).apply {
             this.text = value
@@ -76,8 +96,9 @@ class MainActivity : Activity() {
     private fun card(title: String, body: String): LinearLayout {
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(18, 18, 18, 18)
-            setBackgroundColor(cardBg)
+            setPadding(20, 18, 20, 18)
+            applyBlockMargin(this, 10, 10)
+            background = rounded(cardBg, 30f)
             addView(tv(title, 18f, green, true))
             addView(tv(body, 14f, muted))
         }
@@ -165,7 +186,7 @@ Device:
 - Device: ${Build.DEVICE}
 - Android: ${Build.VERSION.RELEASE}
 - SDK: ${Build.VERSION.SDK_INT}
-- App Version: V9.9
+- App Version: V10.7
 """.trimIndent()
     }
 
@@ -617,7 +638,7 @@ Security:
             text = if (installed) "Open ${app.label}" else "${app.label} not installed"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(if (installed) green else gold)
+            background = rounded(if (installed) green else gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { openAllowedApp(app) }
         }
@@ -631,13 +652,13 @@ Security:
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(20, 38, 20, 28)
+            setPadding(18, 34, 18, 28)
             setBackgroundColor(bg)
         }
 
         root.addView(tv("ABU Native Helper", 30f, textColor, true))
-        root.addView(tv("V9.9 ABU Launcher Shell", 15f, gold, true))
-        root.addView(tv("Launcher-style command home foundation. Not default launcher yet.", 15f, muted))
+        root.addView(tv("V10.7 Premium Command Shell", 15f, gold, true))
+        root.addView(tv("Cleaner beta shell. Safe mode active. Not default launcher yet.", 15f, muted))
 
         root.addView(card(
             "📱 Local ABU Phone ID",
@@ -668,7 +689,7 @@ Security:
             text = "Save Pairing Request"
             textSize = 17f
             setTextColor(Color.BLACK)
-            setBackgroundColor(green)
+            background = rounded(green, 22f)
             setPadding(16, 16, 16, 16)
             setOnClickListener { savePairingRequest() }
         }
@@ -678,7 +699,7 @@ Security:
             text = "Clear Pairing"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 16, 16, 16)
             setOnClickListener { clearPairing() }
         }
@@ -693,7 +714,7 @@ Security:
             text = "Refresh Phone Status"
             textSize = 17f
             setTextColor(Color.BLACK)
-            setBackgroundColor(green)
+            background = rounded(green, 22f)
             setPadding(16, 16, 16, 16)
             setOnClickListener { refreshAll() }
         }
@@ -715,7 +736,7 @@ Security:
             text = "Open Android Settings"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { openAndroidSettings() }
         }
@@ -733,7 +754,7 @@ Security:
             text = "Open Notification Access Settings"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener {
                 openNotificationAccessSettings()
@@ -764,7 +785,7 @@ Security:
             text = "Save Voice Draft"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(green)
+            background = rounded(green, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { saveVoiceDraft() }
         }
@@ -774,7 +795,7 @@ Security:
             text = "Route Draft to Telegram"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { routeDraftToTelegram() }
         }
@@ -784,7 +805,7 @@ Security:
             text = "Clear Voice Draft"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { clearVoiceDraft() }
         }
@@ -803,7 +824,7 @@ Security:
             text = "Open Display Settings"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener {
                 openDisplaySettingsForScreenVision()
@@ -825,7 +846,7 @@ Security:
             text = "Open Accessibility Settings"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener {
                 openAccessibilitySettingsForAbu()
@@ -847,7 +868,7 @@ Security:
             text = "Select ABU Home Card"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(green)
+            background = rounded(green, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { selectLauncherCard("ABU Home") }
         }
@@ -857,7 +878,7 @@ Security:
             text = "Open ABU Web Portal"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { openSafeUrl("ABU Web Portal", "https://ai.ecoluup.com") }
         }
@@ -867,7 +888,7 @@ Security:
             text = "Open Pairing Portal"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { openSafeUrl("Pairing Portal", "https://ai.ecoluup.com/private/pairing/") }
         }
@@ -877,7 +898,7 @@ Security:
             text = "Open GOVO Express"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(gold)
+            background = rounded(gold, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener { openSafeUrl("GOVO Express", "https://govoexpress.com") }
         }
@@ -887,7 +908,7 @@ Security:
             text = "Open Telegram"
             textSize = 16f
             setTextColor(Color.BLACK)
-            setBackgroundColor(green)
+            background = rounded(green, 22f)
             setPadding(16, 14, 16, 14)
             setOnClickListener {
                 openAllowedApp(AllowedApp("Telegram", "org.telegram.messenger"))
@@ -909,7 +930,7 @@ Security:
 
         root.addView(card(
             "🚀 Next",
-            "V10.0 will prepare Real ABU Phone OS beta roadmap."
+            "V10.8 will add Bangla/English label toggle foundation."
         ))
 
         val scroll = ScrollView(this)
