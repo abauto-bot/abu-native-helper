@@ -37,6 +37,8 @@ jobs:
 
       - name: Show environment
         run: |
+          echo '===== gradle.properties ====='
+          cat gradle.properties
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           java -version
